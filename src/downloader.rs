@@ -84,7 +84,11 @@ impl Downloader {
 		let uri = Spotify::parse_uri(uri)?;
 		let item = self.spotify.resolve_uri(&uri).await?;
 		match item {
-			SpotifyItem::Track(t) => self.add_to_queue(t.into()).await,
+			SpotifyItem::Track(t) => {
+				if !t.is_local {
+					self.add_to_queue(t.into()).await;
+				}
+			}
 			SpotifyItem::Album(a) => {
 				let tracks = self.spotify.full_album(&a.id).await?;
 				let queue: Vec<Download> = tracks.into_iter().map(|t| t.into()).collect();
