@@ -48,11 +48,7 @@ impl Spotify {
 		Ok(Spotify {
 			session,
 			spotify,
-			market: if let Some(countrycode) = market_country_code {
-				Some(Market::Country(countrycode))
-			} else {
-				None
-			},
+			market: market_country_code.map(Market::Country),
 		})
 	}
 
@@ -207,7 +203,7 @@ impl Clone for Spotify {
 		Self {
 			session: self.session.clone(),
 			spotify: Client::new(self.spotify.credentials.clone()),
-			market: self.market.clone(),
+			market: self.market,
 		}
 	}
 }

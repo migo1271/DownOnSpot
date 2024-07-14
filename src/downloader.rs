@@ -10,6 +10,7 @@ use librespot::core::spotify_id::SpotifyId;
 use librespot::metadata::{FileFormat, Metadata, Track};
 use sanitize_filename::sanitize;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use tokio::fs::File;
@@ -782,7 +783,6 @@ pub struct Download {
 	pub id: i64,
 	pub track_id: String,
 	pub title: String,
-	pub subtitle: String,
 	pub state: DownloadState,
 }
 
@@ -809,11 +809,6 @@ impl From<aspotify::Track> for Download {
 			id: 0,
 			track_id: val.id.unwrap(),
 			title: val.name,
-			subtitle: val
-				.artists
-				.first()
-				.map(|a| a.name.to_owned())
-				.unwrap_or_default(),
 			state: DownloadState::None,
 		}
 	}
@@ -825,11 +820,6 @@ impl From<aspotify::TrackSimplified> for Download {
 			id: 0,
 			track_id: val.id.unwrap(),
 			title: val.name,
-			subtitle: val
-				.artists
-				.first()
-				.map(|a| a.name.to_owned())
-				.unwrap_or_default(),
 			state: DownloadState::None,
 		}
 	}
@@ -863,15 +853,18 @@ pub enum Quality {
 	Q96,
 }
 
-impl ToString for Quality {
-	fn to_string(&self) -> String {
-		match self {
-			Quality::Q320 => "320kbps",
-			Quality::Q256 => "256kbps",
-			Quality::Q160 => "160kbps",
-			Quality::Q96 => "96kbps",
-		}
-		.to_string()
+impl Display for Quality {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(
+			f,
+			"{}",
+			match self {
+				Quality::Q320 => "320kbps",
+				Quality::Q256 => "256kbps",
+				Quality::Q160 => "160kbps",
+				Quality::Q96 => "96kbps",
+			}
+		)
 	}
 }
 
