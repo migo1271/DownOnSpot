@@ -1,6 +1,6 @@
 use aspotify::{
-	Album, Artist, Client, ClientCredentials, ItemType, Playlist, PlaylistItemType, Track,
-	TrackSimplified,
+	Album, Artist, Client, ClientCredentials, CountryCode, ItemType, Market, Playlist,
+	PlaylistItemType, Track, TrackSimplified,
 };
 use librespot::core::authentication::Credentials;
 use librespot::core::cache::Cache;
@@ -16,6 +16,7 @@ pub struct Spotify {
 	// librespotify sessopm
 	pub session: Session,
 	pub spotify: Client,
+	pub market: Option<Market>,
 }
 
 impl Spotify {
@@ -25,6 +26,7 @@ impl Spotify {
 		password: &str,
 		client_id: &str,
 		client_secret: &str,
+		market_country_code: Option<CountryCode>,
 	) -> Result<Spotify, SpotifyError> {
 		// librespot
 		let credentials = Credentials::with_password(username, password);
@@ -43,7 +45,15 @@ impl Spotify {
 		};
 		let spotify = Client::new(credentials);
 
-		Ok(Spotify { session, spotify })
+		Ok(Spotify {
+			session,
+			spotify,
+			market: if let Some(countrycode) = market_country_code {
+				Some(Market::Country(countrycode))
+			} else {
+				None
+			},
+		})
 	}
 
 	/// Parse URI or URL into URI
@@ -78,15 +88,19 @@ impl Spotify {
 		let id = parts[1];
 		match parts[0] {
 			"track" => {
-				let track = self.spotify.tracks().get_track(id, None).await?;
+				let track = self.spotify.tracks().get_track(id, self.market).await?;
 				Ok(SpotifyItem::Track(track.data))
 			}
 			"playlist" => {
-				let playlist = self.spotify.playlists().get_playlist(id, None).await?;
+				let playlist = self
+					.spotify
+					.playlists()
+					.get_playlist(id, self.market)
+					.await?;
 				Ok(SpotifyItem::Playlist(playlist.data))
 			}
 			"album" => {
-				let album = self.spotify.albums().get_album(id, None).await?;
+				let album = self.spotify.albums().get_album(id, self.market).await?;
 				Ok(SpotifyItem::Album(album.data))
 			}
 			"artist" => {
@@ -119,7 +133,7 @@ impl Spotify {
 			let page = self
 				.spotify
 				.playlists()
-				.get_playlists_items(id, 100, offset, None)
+				.get_playlists_items(id, 100, offset, self.market)
 				.await?;
 			items.append(
 				&mut page
@@ -152,7 +166,7 @@ impl Spotify {
 			let page = self
 				.spotify
 				.albums()
-				.get_album_tracks(id, 50, offset, None)
+				.get_album_tracks(id, 50, offset, self.market)
 				.await?;
 			items.append(&mut page.data.items.to_vec());
 
@@ -172,7 +186,7 @@ impl Spotify {
 			let page = self
 				.spotify
 				.artists()
-				.get_artist_albums(id, None, 50, offset, None)
+				.get_artist_albums(id, None, 50, offset, self.market)
 				.await?;
 
 			for album in &mut page.data.items.iter() {
@@ -193,6 +207,7 @@ impl Clone for Spotify {
 		Self {
 			session: self.session.clone(),
 			spotify: Client::new(self.spotify.credentials.clone()),
+			market: self.market.clone(),
 		}
 	}
 }

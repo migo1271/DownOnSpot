@@ -80,6 +80,7 @@ async fn start() {
 		&settings.password,
 		&settings.client_id,
 		&settings.client_secret,
+		settings.market_country_code,
 	)
 	.await
 	{
