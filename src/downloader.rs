@@ -97,7 +97,11 @@ impl Downloader {
 			}
 			SpotifyItem::Playlist(p) => {
 				let tracks = self.spotify.full_playlist(&p.id).await?;
-				let queue: Vec<Download> = tracks.into_iter().map(|t| t.into()).collect();
+				let queue: Vec<Download> = tracks
+					.into_iter()
+					.filter(|t| !t.is_local)
+					.map(|t| t.into())
+					.collect();
 				self.add_to_queue_multiple(queue).await;
 			}
 			SpotifyItem::Artist(a) => {
