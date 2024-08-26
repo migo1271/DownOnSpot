@@ -1,3 +1,5 @@
+use base64::engine::general_purpose;
+use base64::Engine;
 use chrono::{Datelike, NaiveDate};
 use oggvorbismeta::{read_comment_header, replace_comment_header, CommentHeader, VorbisComments};
 use std::fs::File;
@@ -61,8 +63,10 @@ impl super::Tag for OggTag {
 		picture.extend((data.len() as u32).to_be_bytes().iter());
 		picture.extend(data);
 
-		self.tag
-			.add_tag_single("METADATA_BLOCK_PICTURE", &base64::encode(picture));
+		self.tag.add_tag_single(
+			"METADATA_BLOCK_PICTURE",
+			&general_purpose::STANDARD.encode(picture),
+		);
 	}
 
 	fn set_raw(&mut self, tag: &str, value: Vec<String>) {

@@ -169,7 +169,7 @@ async fn start() {
 
 				let mut progress_sum = 0.;
 
-				for (i, download) in (&downloader.get_downloads().await).iter().enumerate() {
+				for (i, download) in downloader.get_downloads().await.iter().enumerate() {
 					let state = &download.state;
 
 					if state != &download_states[i] {
