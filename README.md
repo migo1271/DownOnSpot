@@ -58,16 +58,7 @@ If you want to help me accelerate this process, please feel free to contact me a
    cargo build --release
    ```
 
-> [!NOTE]
-> You need [this private SSH key](assets/free_librespot_private_key) to clone a dependency of DownOnSpot to use it with a free Spotify account.
-> Follow [this answer by DopeGhoti on stackexchange.com](https://unix.stackexchange.com/a/494485) to set up SSH with the private key.
-> A sample `~/.ssh/config` file could look like this:
->
-> ```text
-> Host github.com
->   IdentityFile ~/.ssh/free_librespot_private_key
-> ```
->
+> [!NOTE]  
 > If you do not want to use `free-librespot` (i.e. if you are using a paid Spotify account), replace `git = "ssh://git@github.com/oSumAtrIX/free-librespot.git"` with `librespot = "0.4.2"` inside the `Cargo.toml` file.
 
 ## 🕹️ Usage
