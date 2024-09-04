@@ -60,10 +60,10 @@ async fn start() {
 			match default_settings.save().await {
 				Ok(path) => {
 					println!(
-						"{}{}",
-						"..but default settings have been created successfully. Edit them and run the program again.\nFind the settings file at: ".green(),
-						path.to_string_lossy()
-					);
+                        "{}{}",
+                        "..but default settings have been created successfully. Edit them and run the program again.\nFind the settings file at: ".green(),
+                        path.to_string_lossy()
+                    );
 				}
 				Err(e) => {
 					println!(
@@ -155,6 +155,7 @@ async fn start() {
 			let mut download_states =
 				vec![DownloadState::None; downloader.get_downloads().await.len()];
 			let mut messages = vec![];
+			let mut errors = vec![];
 
 			'outer: loop {
 				print!("\x1b[2J\x1b[1;1H");
@@ -162,6 +163,7 @@ async fn start() {
 
 				let mut num_completed = 0;
 				let mut num_err = 0;
+				let mut num_skipped = 0;
 				let mut num_downloading = 0;
 				let mut num_waiting = 0;
 
@@ -180,19 +182,28 @@ async fn start() {
 							DownloadState::Downloading(_, _) => (),
 							DownloadState::Post => (),
 							DownloadState::Done => messages.push(format!(
-								"{time_elapsed: >5} | {}: {}",
+								" {} | {}: {}",
+								secs_to_hrs_min_sec(time_elapsed as i32),
 								"Downloaded".green(),
 								download.title
 							)),
-							DownloadState::Error(e) => messages.push(format!(
-								"{time_elapsed: >5} | {}: {}",
+							DownloadState::Error(e) => {
+								let msg = format!(
+									" {} | {}: {}",
+									secs_to_hrs_min_sec(time_elapsed as i32),
+									if e == &SpotifyError::AlreadyDownloaded {
+										e.to_string().yellow()
+									} else {
+										e.to_string().red()
+									},
+									download.title
+								);
 								if e == &SpotifyError::AlreadyDownloaded {
-									e.to_string().yellow()
+									messages.push(msg);
 								} else {
-									e.to_string().red()
-								},
-								download.title
-							)),
+									errors.push(msg);
+								}
+							}
 						};
 					}
 
@@ -217,8 +228,13 @@ async fn start() {
 							num_waiting += 1;
 							None
 						}
-						DownloadState::Error(_) => {
-							num_err += 1;
+						DownloadState::Error(e) => {
+							if e == &SpotifyError::AlreadyDownloaded {
+								num_skipped += 1;
+							} else {
+								num_err += 1;
+							}
+
 							None
 						}
 						DownloadState::Done => {
@@ -231,16 +247,19 @@ async fn start() {
 					}
 				}
 
-				while messages.len() > 8 {
+				while messages.len() > 10 {
 					messages.remove(0);
 				}
 
 				println!(" {bold}\x1b[0;34m- DownOnSpot v{VERSION} -\x1b[0m{bold_off}\n");
 
-				println!("Time elapsed:   {}", secs_to_min_sec(time_elapsed as i32));
+				println!(
+					"Time elapsed:   {}",
+					secs_to_hrs_min_sec(time_elapsed as i32)
+				);
 				println!(
 					"Time remaining: {}\n",
-					secs_to_min_sec(
+					secs_to_hrs_min_sec(
 						(time_elapsed as f32
 							/ (progress_sum + num_completed as f32 + num_err as f32)
 							* (num_waiting as f32 + num_downloading as f32 - progress_sum))
@@ -249,25 +268,40 @@ async fn start() {
 				);
 
 				println!(
-					" {bold}{}   {}{bold_off}",
+					" {bold}  {}      {}{bold_off}",
 					"Time".underline(),
 					"Event".underline()
 				);
-				for message in &messages {
+				for message in messages.iter().rev() {
 					println!("{}", message);
 				}
+
+				if !errors.is_empty() {
+					println!(
+						"\n {bold}  {}      {}{bold_off}",
+						"Time".underline(),
+						"Error".underline()
+					);
+					for error in errors.iter().rev().take(5) {
+						println!("{}", error);
+					}
+				}
+
 				println!("\n\n {}", "Current downloads:".underline().bold());
 				println!("{}", current_download_view);
 
 				println!(
-					"\n {bold}Waiting | {} | {} | Total{bold_off}",
-					"Err/Skip".red(),
-					"Done".green()
+					"\n{bold}{}|{}|{}|{}| Total{bold_off}",
+					" Waiting ",
+					" Failed  ".red(),
+					" Skipped ".yellow(),
+					" Done    ".green()
 				);
 				println!(
-					" {: <8}| {: <9}| {: <5}| {}",
+					" {: <8}| {: <8}| {: <8}| {: <8}| {}",
 					num_waiting,
 					num_err,
+					num_skipped,
 					num_completed,
 					download_states.len()
 				);
@@ -279,10 +313,18 @@ async fn start() {
 
 				task::sleep(refresh).await
 			}
+
 			println!(
 				"Finished download(s) in {}.",
-				secs_to_min_sec(time_elapsed as i32)
+				secs_to_hrs_min_sec(time_elapsed as i32)
 			);
+
+			if !errors.is_empty() {
+				println!("\n\n All Errors:");
+				for error in errors {
+					println!("{}", error);
+				}
+			}
 		}
 		Err(e) => {
 			error!("{} {}", "Handling input failed:".red(), e)
@@ -290,6 +332,8 @@ async fn start() {
 	}
 }
 
-fn secs_to_min_sec(secs: i32) -> String {
-	format!("{:0>2}m{:0>2}s", secs / 60, secs % 60)
+fn secs_to_hrs_min_sec(secs: i32) -> String {
+	format!("{:0>2}:{:0>2}:{:0>2}", secs / 360, secs / 60, secs % 60)
 }
+
+// !cargo b --release
