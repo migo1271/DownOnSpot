@@ -68,6 +68,12 @@ impl From<librespot::core::mercury::MercuryError> for SpotifyError {
 	}
 }
 
+impl From<librespot::core::error::Error> for SpotifyError {
+    fn from(e: librespot::core::error::Error) -> Self {
+        SpotifyError::Error(e.to_string())
+    }
+}
+
 impl From<librespot::core::session::SessionError> for SpotifyError {
 	fn from(e: librespot::core::session::SessionError) -> Self {
 		match e {

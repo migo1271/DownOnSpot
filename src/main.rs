@@ -27,12 +27,6 @@ async fn main() {
 	start().await;
 }
 
-impl From<librespot::core::error::Error> for SpotifyError {
-    fn from(e: librespot::core::error::Error) -> Self {
-        SpotifyError::Error(e.to_string())
-    }
-}
-
 #[cfg(windows)]
 #[tokio::main]
 async fn main() {

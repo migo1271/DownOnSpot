@@ -201,6 +201,7 @@ async fn communication_thread(
 }
 
 /// Spotify downloader
+
 pub struct DownloaderInternal {
 	spotify: Spotify,
 	pub tx: Sender<DownloaderMessage>,
@@ -485,19 +486,22 @@ impl DownloaderInternal {
 		Ok(())
 	}
 
+    
     async fn find_alternative(session: &Session, track: Track) -> Result<Track, SpotifyError> {
         let librespot::metadata::track::Tracks(ids) = track.alternatives;
-        for alt in ids {
-            let t = Track::get(session, &alt).await.unwrap(); // TODO ?
-            let librespot::metadata::availability::Availabilities(avalabilities) = t.availability;
-                for a in avalabilities {
-                    // TODO: figure out if available
-                }
+        for id in ids {
+            let t = Track::get(session, &id).await?;
+            if !Self::track_has_alternatives(&t) {
+                return Ok(t);
+            }
         }
 
-
-
         Err(SpotifyError::Unavailable)
+    }
+
+    fn track_has_alternatives(track: &Track) -> bool {
+        let librespot::metadata::track::Tracks(alts) = &track.alternatives;
+        !alts.is_empty()
     }
 
 	/// Download track by id
@@ -513,9 +517,15 @@ impl DownloaderInternal {
 		let mut track = Track::get(session, &id).await?;
 
 		// Fallback if unavailable
-		/*if !track.available {
-			track = DownloaderInternal::find_alternative(session, track).await?;
-		}*/ //TODO
+        if Self::track_has_alternatives(&track) {
+            track = Self::find_alternative(session, track).await?;
+        }
+        
+
+
+		// if !track.available {
+		// 	track = DownloaderInternal::find_alternative(session, track).await?;
+		// } //TODO
 
 		// Quality fallback
 		let mut quality = config.quality;
@@ -689,6 +699,7 @@ pub enum AudioFormat {
 	Aac,
 	Mp3,
 	Mp4,
+    Flac,
 	Unknown,
 }
 
@@ -700,6 +711,7 @@ impl AudioFormat {
 			AudioFormat::Aac => "m4a",
 			AudioFormat::Mp3 => "mp3",
 			AudioFormat::Mp4 => "mp4",
+            AudioFormat::Flac => "flac",
 			AudioFormat::Unknown => "",
 		}
 		.to_string()
@@ -719,7 +731,7 @@ impl From<FileFormat> for AudioFormat {
 			FileFormat::MP3_160_ENC => Self::Mp3,
 			FileFormat::AAC_24 => Self::Aac,
 			FileFormat::AAC_48 => Self::Aac,
-            FileFormat::FLAC_FLAC => Self::Unknown
+            FileFormat::FLAC_FLAC => Self::Flac
 		}
 	}
 }
