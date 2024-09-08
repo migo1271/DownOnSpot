@@ -19,6 +19,8 @@ pub enum SpotifyError {
 	ID3Error(String, String),
 	Reqwest(String),
 	InvalidFormat,
+    NotConnected,
+    UnknownPacket(u8),
 	AlreadyDownloaded,
 }
 
@@ -43,6 +45,8 @@ impl fmt::Display for SpotifyError {
 			SpotifyError::ID3Error(k, e) => write!(f, "ID3 Error: {} {}", k, e),
 			SpotifyError::Reqwest(e) => write!(f, "Reqwest Error: {}", e),
 			SpotifyError::InvalidFormat => write!(f, "Invalid Format!"),
+            SpotifyError::NotConnected => write!(f, "Not Connected"),
+            SpotifyError::UnknownPacket(e) => write!(f, "Unknown Packet: {}", e),
 			SpotifyError::AlreadyDownloaded => write!(f, "Already Downloaded"),
 		}
 	}
@@ -70,7 +74,9 @@ impl From<librespot::core::session::SessionError> for SpotifyError {
 			librespot::core::session::SessionError::IoError(e) => e.into(),
 			librespot::core::session::SessionError::AuthenticationError(_) => {
 				SpotifyError::AuthenticationError
-			}
+			},
+            librespot::core::session::SessionError::NotConnected => SpotifyError::NotConnected,
+            librespot::core::session::SessionError::Packet(e) => SpotifyError::UnknownPacket(e)
 		}
 	}
 }

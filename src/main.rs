@@ -14,6 +14,7 @@ use async_std::task;
 use colored::Colorize;
 use downloader::{DownloadState, Downloader};
 use error::SpotifyError;
+use librespot::core::spotify_id::SpotifyIdResult;
 use settings::Settings;
 use spotify::Spotify;
 use std::time::{Duration, Instant};
@@ -24,6 +25,12 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[tokio::main]
 async fn main() {
 	start().await;
+}
+
+impl From<librespot::core::error::Error> for SpotifyError {
+    fn from(e: librespot::core::error::Error) -> Self {
+        SpotifyError::Error(e.to_string())
+    }
 }
 
 #[cfg(windows)]

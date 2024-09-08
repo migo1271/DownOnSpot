@@ -12,6 +12,7 @@ use url::Url;
 
 use crate::error::SpotifyError;
 
+
 pub struct Spotify {
 	// librespotify sessopm
 	pub session: Session,
@@ -34,13 +35,9 @@ impl Spotify {
 			Some(creds) => creds,
 			None => Credentials::with_password(username, password),
 		};
-		let (session, _) = Session::connect(
-			SessionConfig::default(),
-			credentials,
-			Some(cache),
-			true,
-		)
-		.await?;
+
+        let session = Session::new(SessionConfig::default(), Some(cache));
+        session.connect(credentials, true).await?;
 
 		//aspotify
 		let credentials = ClientCredentials {
