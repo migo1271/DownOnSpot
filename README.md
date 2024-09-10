@@ -2,40 +2,8 @@
 
 # DownOnSpot
 
-A Spotify downloader written in Rust
-
-<img src="assets/icon.svg" alt="drawing" width="500"/>
-
 <br>
-
-[![Build project](https://github.com/oSumAtrIX/DownOnSpot/actions/workflows/build.yml/badge.svg)](https://github.com/oSumAtrIX/DownOnSpot/actions/workflows/build.yml)
-[![GitHub license](https://img.shields.io/github/license/oSumAtrIX/DownOnSpot)](https://github.com/oSumAtrIX/DownOnSpot/blob/main/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/oSumAtrIX/DownOnSpot)](https://github.com/oSumAtrIX/DownOnSpot/issues)
-[![GitHub forks](https://img.shields.io/github/forks/oSumAtrIX/DownOnSpot)](https://github.com/oSumAtrIX/DownOnSpot/network)
-[![GitHub stars](https://img.shields.io/github/stars/oSumAtrIX/DownOnSpot)](https://github.com/oSumAtrIX/DownOnSpot/stargazers)
-[![Stability: Experimental](https://masterminds.github.io/stability/experimental.svg)](https://masterminds.github.io/stability/experimental.html)
-
 </div>
-
-## 🆘 Help needed
-
-> [!NOTE]
-Currently, I am [rewriting DownOnSpot](https://github.com/oSumAtrIX/DownOnSpot/pull/68).  
-If you want to help me accelerate this process, please feel free to contact me at [osumatrix.me](https://osumatrix.me).
-
-## ⭐ Features
-
-- ✅ Actually downloads from Spotify, free and premium
-- ✅ Chose between 96, 160, 256 and 320 kbit/s (free users can't exceed 160kbit/s)
-- ✅ Download tracks, playlists, albums and artists
-- ✅ Multi-threaded
-- ✅ Search for tracks
-- ✅ Download MP3 and original OGG files
-- ✅ Metadata tagging
-- ✅ Simple CLI interface
-
-> [!NOTE]
-> Free Spotify users can not exceed 160kbit/s. Change the `quality` setting in the `settings.json` file to `Q160` or lower. If you want to download 256 or 320kbit/s, you need to use a premium account.
 
 ## ⚒️ Building
 
@@ -58,12 +26,8 @@ If you want to help me accelerate this process, please feel free to contact me a
    cargo build --release
    ```
 
-> [!NOTE]  
-> If you do not want to use `free-librespot` (i.e. if you are using a paid Spotify account), replace `git = "ssh://git@github.com/oSumAtrIX/free-librespot.git"` with `librespot = "0.4.2"` inside the `Cargo.toml` file.
-
 ## 🕹️ Usage
 
-1. Create a [new application](https://developer.spotify.com/dashboard/applications) on the Spotify developer dashboard
 2. Run DownOnSpot
 
    ```bash
@@ -110,12 +74,6 @@ You can use the following template variables for `path` and `filename_template` 
 
 - Slow MP3 downloads due to libmp3lame
 - Sporadic `channel error` when downloading tracks
-
-## 💪 Contributors
-
-<a href="https://github.com/osumatrix/downonspot/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=osumatrix/downonspot" />
-</a>
 
 ## 🔑 License
 
