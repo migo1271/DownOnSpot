@@ -35,3 +35,9 @@ jobs:
 
       - name: Build
         run: cargo build
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: down_on_spot
+          path: target/debug/  
