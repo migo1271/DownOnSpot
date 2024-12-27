@@ -34,7 +34,7 @@ jobs:
           prefix-key: v${{steps.rust.outputs.cachekey}}-rust
 
       - name: Build
-        run: cargo build
+        run: cargo build --release
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
