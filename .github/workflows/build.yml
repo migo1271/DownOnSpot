@@ -49,5 +49,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: compiled-file-${{ runner.os }}
-          path: target/release/
+          path: target/release/down_on_spot*
           
