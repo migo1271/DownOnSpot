@@ -46,7 +46,7 @@ jobs:
         run: cargo build --release
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-file-${{ runner.os }}
           path: target/release/down_on_spot*
