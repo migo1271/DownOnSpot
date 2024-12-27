@@ -28,6 +28,11 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt install -y libasound2-dev libmp3lame-dev
 
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install nasm
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         id: rust
@@ -44,5 +49,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: compiled-file-${{ runner.os }}
-          path: target/debug/
+          path: target/release/
           
