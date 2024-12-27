@@ -16,12 +16,16 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: sudo apt install -y libasound2-dev libmp3lame-dev
 
       - name: Install Rust
@@ -34,10 +38,11 @@ jobs:
           prefix-key: v${{steps.rust.outputs.cachekey}}-rust
 
       - name: Build
-        run: cargo build --release
-      
+        run: cargo build
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: down_on_spot
-          path: target/debug/  
+          name: compiled-file-${{ runner.os }}
+          path: target/debug/
+          
