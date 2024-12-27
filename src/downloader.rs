@@ -731,7 +731,12 @@ impl From<FileFormat> for AudioFormat {
 			FileFormat::MP3_160_ENC => Self::Mp3,
 			FileFormat::AAC_24 => Self::Aac,
 			FileFormat::AAC_48 => Self::Aac,
-            FileFormat::FLAC_FLAC => Self::Flac
+            FileFormat::FLAC_FLAC => Self::Flac,
+			FileFormat::AAC_160 => Self::Aac,
+			FileFormat::AAC_320 => Self::Aac,
+			FileFormat::MP4_128 => Self::Aac,
+			FileFormat::OTHER5 => Self::Flac,
+			FileFormat::UNKNOWN_FORMAT => Self::Flac
 		}
 	}
 }
