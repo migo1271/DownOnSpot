@@ -16,13 +16,22 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: sudo apt install -y libasound2-dev libmp3lame-dev
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install nasm
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -34,4 +43,11 @@ jobs:
           prefix-key: v${{steps.rust.outputs.cachekey}}-rust
 
       - name: Build
-        run: cargo build
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-file-${{ runner.os }}
+          path: target/release/down_on_spot*
+          
