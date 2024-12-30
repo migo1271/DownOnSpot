@@ -334,7 +334,7 @@ async fn start() {
 }
 
 fn secs_to_hrs_min_sec(secs: i32) -> String {
-	format!("{:0>2}:{:0>2}:{:0>2}", secs / 360, secs / 60, secs % 60)
+	format!("{:0>2}:{:0>2}:{:0>2}", secs / 3600, (secs % 3600) / 60, secs % 60)
 }
 
 // !cargo b --release
